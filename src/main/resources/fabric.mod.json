@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "idleshutdown",
+	"version": "${version}",
+	"name": "IdleShutdown",
+	"description": "A very simple plugin for shutting a server down a few minutes after the last player leaves",
+	"authors": [
+		"Jusdino"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/idleshutdown/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+			"space.frahm.minecraft.idleshutdown.IdleShutdown"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {}
+}

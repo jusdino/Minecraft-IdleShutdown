@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class IdleShutdown implements ModInitializer {
 		// deactivate this listener.
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (initialized) return;
-			if (server.getCurrentPlayerCount() <= 0) {
+			if (server.getPlayerCount() <= 0) {
 				LOGGER.info("Starting shutdown timer for {} minutes", config.getMinutesUntilShutdown());
 				startShutdownTimer(server);
 			}
@@ -47,19 +47,19 @@ public class IdleShutdown implements ModInitializer {
 
 		// Register join event listener
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			ServerPlayerEntity player = handler.getPlayer();
-			LOGGER.info("Player {} joined the server. Deactivating shutdown.", player.getName().getString());
+			ServerPlayer player = handler.getPlayer();
+			LOGGER.info("Player {} joined the server. Deactivating shutdown.", player.getGameProfile().name());
 			cancelShutdown();
 		});
 
 		// Register leave event listener
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			// Minus one to discount the currently disconnecting player
-			int playerCount = server.getCurrentPlayerCount() - 1;
-			ServerPlayerEntity player = handler.getPlayer();
+			int playerCount = server.getPlayerCount() - 1;
+			ServerPlayer player = handler.getPlayer();
 			LOGGER.info(
 				"Player {} left the server, {} still connected.",
-				player.getName().getString(),
+				player.getGameProfile().name(),
 				playerCount
 			);
 			if (playerCount <= 0) {
@@ -75,7 +75,7 @@ public class IdleShutdown implements ModInitializer {
 		// Schedule the actual shutdown
 		shutdownTask = scheduler.schedule(() -> {
 			LOGGER.info("Server idle timeout reached. Shutting down.");
-			server.execute(() -> server.stop(false));
+			server.execute(() -> server.halt(false));
 			scheduler.shutdown();
 		}, config.getMinutesUntilShutdown(), TimeUnit.MINUTES);
 	}
